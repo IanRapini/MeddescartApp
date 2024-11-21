@@ -71,7 +71,7 @@ export default function UsuariosTotens() {
               <Text style={styles.label}>Email:</Text> {registro.email}
             </Text>
             <Text style={styles.infoText}>
-              <Text style={styles.label}>Horário:</Text> {registro.horario}
+              <Text style={styles.label}>Horário:</Text> {registro.data}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.label}>Pontos:</Text> {registro.pontos}
