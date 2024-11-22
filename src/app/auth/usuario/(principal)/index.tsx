@@ -64,7 +64,7 @@ export default function UsuariosTotens() {
       <View style={styles.pointsContainer}>
         <View style={styles.pointsContent}>
           <Text style={styles.totalPointsText}>Total de Pontos:</Text>
-          <Text style={styles.totalPointsValue}>{usuario && usuario.pontos} </Text>
+          <Text style={styles.totalPointsValue}>{usuario && usuario.pontos ? usuario.pontos : '0'} </Text>
         </View>
       </View>
       
@@ -88,17 +88,19 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 10,
     fontWeight: 'bold',
+    borderBottomWidth: 1, 
+    borderBottomColor: '#ccc', 
+    paddingBottom: 5, 
   },
   userName: {
     color: '#007ACC',
   },
   sectionTitle: {
-    fontSize: 18,
-    color: '#333',
-    marginVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingBottom: 5,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+    marginBottom: 10,
+    textAlign: 'center',
   },
   card: {
     flexDirection: 'row',

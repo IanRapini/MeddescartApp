@@ -28,6 +28,17 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="usuarios/index"
+        options={{
+          title: 'Usuarios',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} color={color} />
+          ),
+        }}
+      />
+
     </Tabs>
+    
   );
 }

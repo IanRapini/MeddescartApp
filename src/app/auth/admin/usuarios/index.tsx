@@ -6,116 +6,104 @@ import {
     TouchableOpacity,
     StyleSheet,
     Alert,
-    TextInput,
 } from 'react-native';
 import { auth, db } from '../../../../config/firebaseConfig';
 import { router } from 'expo-router';
-import { collection, getDocs, addDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
 
-export default function TotensLista() {
-    const [totens, setTotens] = useState<{ id: string; nome: string; status: 'parado' | 'iniciado' | 'aguardo' }[]>([]);
-    const [novoTotemNome, setNovoTotemNome] = useState('');
-    const [usuario, setUsuario] = useState<any>(null);
+export default function UsuariosLista() {
+    const [usuarios, setUsuarios] = useState<{ id: string; nome: string; status: 'admin' | 'usuario' }[]>([]);
+    const [usuarioLogado, setUsuarioLogado] = useState<any>(null);
 
     const handleLogout = () => {
         auth.signOut();
         router.replace('/');
     };
 
-    const getUsuario = async () => {
-        if (auth.currentUser) {
-            const snapshot = await getDoc(doc(db, 'usuarios', auth.currentUser.uid));
-            const dados = snapshot.data();
-            setUsuario(dados);
-        }
-    };
-
-    const getTotens = async () => {
+    const getUsuarios = async () => {
         try {
-            const snapshot = await getDocs(collection(db, 'totens'));
-            const totensList: { id: string; nome: string; status: 'parado' | 'iniciado' | 'aguardo' }[] = [];
+            const snapshot = await getDocs(collection(db, 'usuarios'));
+            const usuariosList: { id: string; nome: string; status: 'admin' | 'usuario' }[] = [];
             snapshot.forEach((doc) => {
-                totensList.push({
+                usuariosList.push({
                     id: doc.id,
-                    nome: doc.data().totem || 'Nome não definido',
-                    status: doc.data().status || 'parado',
+                    nome: doc.data().nome || 'Nome não definido',
+                    status: doc.data().status || 'usuario',
                 });
             });
-            setTotens(totensList);
+            setUsuarios(usuariosList);
         } catch (error) {
-            console.error('Erro ao carregar os totens:', error);
+            console.error('Erro ao carregar os usuários:', error);
         }
     };
 
-    const handleAddTotem = async () => {
-        if (!novoTotemNome) {
-            Alert.alert('Erro', 'Por favor, insira o nome do totem.');
-            return;
-        }
-
-        try {
-            await addDoc(collection(db, 'totens'), {
-                totem: novoTotemNome,
-                status: 'parado',
-                usuario: auth.currentUser?.uid || 'admin',
-            });
-            Alert.alert('Sucesso', 'Totem adicionado com sucesso!');
-            setNovoTotemNome('');
-            getTotens();
-        } catch (error) {
-            console.error('Erro ao adicionar o totem:', error);
-            Alert.alert('Erro', 'Não foi possível adicionar o totem.');
+    const getUsuarioLogado = async () => {
+        if (auth.currentUser) {
+            try {
+                const snapshot = await getDoc(doc(db, 'usuarios', auth.currentUser.uid));
+                if (snapshot.exists()) {
+                    setUsuarioLogado(snapshot.data());
+                } else {
+                    console.warn('Usuário logado não encontrado no banco de dados');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário logado:', error);
+            }
         }
     };
 
-    const handleDeleteTotem = async (id: string) => {
-        Alert.alert('Excluir Totem', `Você deseja excluir o totem com ID: ${id}?`, [
+    const handleDeleteUsuario = async (id: string) => {
+        Alert.alert('Excluir Usuário', `Você deseja excluir o usuário com ID: ${id}?`, [
             { text: 'Cancelar', style: 'cancel' },
             {
                 text: 'Excluir',
                 style: 'destructive',
                 onPress: async () => {
                     try {
-                        const totemDocRef = doc(db, 'totens', id);
-                        await deleteDoc(totemDocRef);
-                        setTotens((prevTotens) => prevTotens.filter((totem) => totem.id !== id));
-                        Alert.alert('Sucesso', 'Totem excluído com sucesso!');
+                        const usuarioDocRef = doc(db, 'usuarios', id);
+                        await deleteDoc(usuarioDocRef);
+                        setUsuarios((prevUsuarios) => prevUsuarios.filter((usuario) => usuario.id !== id));
+                        Alert.alert('Sucesso', 'Usuário excluído com sucesso!');
                     } catch (error) {
-                        console.error('Erro ao excluir o totem:', error);
-                        Alert.alert('Erro', 'Não foi possível excluir o totem.');
+                        console.error('Erro ao excluir o usuário:', error);
+                        Alert.alert('Erro', 'Não foi possível excluir o usuário.');
                     }
                 },
             },
         ]);
     };
 
+    const toggleAdminStatus = async (id: string, currentStatus: 'admin' | 'usuario') => {
+        const newStatus = currentStatus === 'admin' ? 'usuario' : 'admin';
+        try {
+            const usuarioDocRef = doc(db, 'usuarios', id);
+            await updateDoc(usuarioDocRef, { status: newStatus });
+            setUsuarios((prevUsuarios) =>
+                prevUsuarios.map((usuario) =>
+                    usuario.id === id ? { ...usuario, status: newStatus } : usuario
+                )
+            );
+            Alert.alert('Sucesso', `Usuário agora é ${newStatus}.`);
+        } catch (error) {
+            console.error('Erro ao atualizar o status:', error);
+            Alert.alert('Erro', 'Não foi possível atualizar o status do usuário.');
+        }
+    };
+
     useEffect(() => {
-        getUsuario();
-        getTotens();
+        getUsuarios();
+        getUsuarioLogado();
     }, []);
 
     return (
         <View style={styles.container}>
             <Text style={styles.headerText}>
-                Olá,{' '}
-                <Text style={styles.userName}>{usuario && usuario.nome ? usuario.nome : 'Usuário'}</Text>
+                Olá, <Text style={styles.userName}>{usuarioLogado?.nome || 'Usuário'}</Text>
             </Text>
-            <Text style={styles.title}>Gerenciamento de Totens</Text>
-
-            <View style={styles.addTotemContainer}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Nome do Totem"
-                    value={novoTotemNome}
-                    onChangeText={setNovoTotemNome}
-                />
-                <TouchableOpacity style={styles.addTotemButton} onPress={handleAddTotem}>
-                    <Text style={styles.addTotemText}>+ Adicionar Totem</Text>
-                </TouchableOpacity>
-            </View>
+            <Text style={styles.title}>Gerenciamento de Usuários</Text>
 
             <FlatList
-                data={totens}
+                data={usuarios}
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <View style={styles.row}>
@@ -124,7 +112,7 @@ export default function TotensLista() {
                             </Text>
                             <TouchableOpacity
                                 style={styles.deleteButton}
-                                onPress={() => handleDeleteTotem(item.id)}
+                                onPress={() => handleDeleteUsuario(item.id)}
                             >
                                 <Text style={styles.deleteButtonText}>Excluir</Text>
                             </TouchableOpacity>
@@ -132,6 +120,14 @@ export default function TotensLista() {
                         <Text style={styles.infoText}>
                             <Text style={styles.label}>ID:</Text> {item.id}
                         </Text>
+                        <TouchableOpacity
+                            style={styles.toggleButton}
+                            onPress={() => toggleAdminStatus(item.id, item.status)}
+                        >
+                            <Text style={styles.toggleButtonText}>
+                                {item.status === 'admin' ? 'Tornar Usuário' : 'Tornar Admin'}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                 )}
                 keyExtractor={(item) => item.id}
@@ -171,27 +167,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         textAlign: 'center',
     },
-    addTotemContainer: {
-        marginBottom: 15,
-    },
-    input: {
-        height: 40,
-        borderColor: '#007ACC',
-        borderWidth: 1,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-        marginBottom: 10,
-    },
-    addTotemButton: {
-        backgroundColor: '#A5D6A7',
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-    },
-    addTotemText: {
-        color: '#2E7D32',
-        fontWeight: 'bold',
-    },
     listContent: {
         flexGrow: 1,
         paddingBottom: 20,
@@ -226,6 +201,18 @@ const styles = StyleSheet.create({
     deleteButtonText: {
         color: '#D32F2F',
         fontWeight: 'bold',
+    },
+    toggleButton: {
+        backgroundColor: '#90CAF9',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        marginTop: 10,
+    },
+    toggleButtonText: {
+        color: '#1565C0',
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     logoutButton: {
         alignItems: 'center',

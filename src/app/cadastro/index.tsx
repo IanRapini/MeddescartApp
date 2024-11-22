@@ -1,5 +1,16 @@
 import React from 'react';
-import {View,Text,TextInput,StyleSheet,TouchableOpacity,KeyboardAvoidingView,Platform,ScrollView,Alert,Image,} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+  Image,
+} from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { createUserWithEmailAndPassword } from '@firebase/auth';
@@ -10,13 +21,7 @@ import { useNavigation } from 'expo-router';
 export default function CadastroScreen() {
   const navigation = useNavigation();
 
-  const handleCadastro = async ({
-    email,
-    senha,
-    confirmSenha,
-    nome,
-    idade,
-  }: any) => {
+  const handleCadastro = async ({ email, senha, confirmSenha, nome }: any) => {
     if (senha !== confirmSenha) {
       Alert.alert('Erro', 'As senhas não coincidem');
       return;
@@ -27,7 +32,6 @@ export default function CadastroScreen() {
         setDoc(doc(db, 'usuarios', usuario.user.uid), {
           email,
           nome,
-          idade,
         });
         Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
         navigation.goBack();
@@ -36,7 +40,7 @@ export default function CadastroScreen() {
         console.log(erro);
         Alert.alert(
           'Erro',
-          'Não foi possível criar o usuário, tente novamente',
+          'Não foi possível criar o usuário, tente novamente'
         );
       });
   };
@@ -47,11 +51,6 @@ export default function CadastroScreen() {
       .email('Digite um email válido')
       .required('O email é obrigatório'),
     nome: yup.string().required('O campo nome é obrigatório'),
-    idade: yup
-      .number()
-      .required('O campo idade é obrigatório')
-      .positive('O valor precisa ser um número positivo')
-      .integer('O valor precisa ser um número inteiro'),
     senha: yup
       .string()
       .required('A senha é obrigatória')
@@ -65,19 +64,20 @@ export default function CadastroScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
+      style={styles.container}
+    >
       <ScrollView style={{ flex: 1, padding: 10 }}>
         <View style={styles.container}>
-        <Image
-          source={require('@/assets/images/LOGO FINAL (3).png')}
-          style={{width:200, height: 200, alignSelf: 'center'}}
-          resizeMode="cover"
-        />
-        <Image
-          source={require('@/assets/images/LOGO FINAL (4).png')}
-          style={{width: 280, height: 70, alignSelf: 'center'}}
-          resizeMode="cover"
-        />
+          <Image
+            source={require('@/assets/images/LOGO FINAL (3).png')}
+            style={{ width: 200, height: 200, alignSelf: 'center' }}
+            resizeMode="cover"
+          />
+          <Image
+            source={require('@/assets/images/LOGO FINAL (4).png')}
+            style={{ width: 280, height: 70, alignSelf: 'center' }}
+            resizeMode="cover"
+          />
           <View style={styles.formContainer}>
             <Formik
               initialValues={{
@@ -85,10 +85,10 @@ export default function CadastroScreen() {
                 senha: '',
                 confirmSenha: '',
                 nome: '',
-                idade: '',
               }}
               validationSchema={validationSchema}
-              onSubmit={handleCadastro}>
+              onSubmit={handleCadastro}
+            >
               {({
                 handleChange,
                 handleBlur,
@@ -126,20 +126,6 @@ export default function CadastroScreen() {
                     )}
                   </View>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Idade</Text>
-                    <TextInput
-                      onChangeText={handleChange('idade')}
-                      onBlur={handleBlur('idade')}
-                      value={values.idade}
-                      placeholder="Digite sua idade"
-                      keyboardType="decimal-pad"
-                      style={styles.input}
-                    />
-                    {touched.idade && errors.idade && (
-                      <Text style={styles.error}>{errors.idade}</Text>
-                    )}
-                  </View>
-                  <View style={styles.inputGroup}>
                     <Text style={styles.label}>Senha</Text>
                     <TextInput
                       onChangeText={handleChange('senha')}
@@ -169,7 +155,8 @@ export default function CadastroScreen() {
                   </View>
                   <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handleSubmit()}>
+                    onPress={() => handleSubmit()}
+                  >
                     <Text style={styles.buttonText}>Cadastrar</Text>
                   </TouchableOpacity>
                 </View>
@@ -226,17 +213,4 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
   },
- /* logo: {
-    width: 150, 
-    height: 150,
-    resizeMode: 'contain',
-    marginBottom: 10,
-  },
-  subtitle: {
-    width: 200, 
-    height: 50,
-    resizeMode: 'contain',
-    marginBottom: 20,
-
-  },*/
 });
