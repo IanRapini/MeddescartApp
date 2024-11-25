@@ -64,7 +64,7 @@ export default function UsuariosTotens() {
       <View style={styles.pointsContainer}>
         <View style={styles.pointsContent}>
           <Text style={styles.totalPointsText}>Total de Pontos:</Text>
-          <Text style={styles.totalPointsValue}>{usuario && usuario.pontos ? usuario.pontos : '0'} </Text>
+          <Text style={styles.totalPointsValue}>{usuario && usuario.pontos ? usuario.pontos : '0' } </Text>
         </View>
       </View>
       

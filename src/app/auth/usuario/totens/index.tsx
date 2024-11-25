@@ -6,7 +6,7 @@ import { collection, doc, getDocs, onSnapshot, query, updateDoc, where } from 'f
 
 export default function UsuariosTotens() {
   const [totens, setTotens] = useState<
-    { id: string; nome: string; status: 'parado' | 'iniciado' | 'aguardo' }[]
+    { id: string; totem: string; status: 'parado' | 'iniciado' | 'aguardo' }[]
   >([]);
 
   const handleLogout = () => {
@@ -23,12 +23,15 @@ export default function UsuariosTotens() {
     onSnapshot(querySnapshot, async (snapshot) => {
       const totens: {
         id: string;
-        nome: string;
+        totem: string;
         status: 'parado' | 'iniciado' | 'aguardo';
       }[] = [];
+      
       snapshot.forEach((doc) => {
+        console.log(doc)
         totens.push({ id: doc.id, ...(doc.data() as any) });
       });
+            
       setTotens(totens);
     });
   };
@@ -49,7 +52,7 @@ export default function UsuariosTotens() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Totem: {item.nome}</Text>
+              <Text style={styles.cardTitle}>Totem: {item.totem}</Text>
               <Text style={styles.cardSubtitle}>
                 Status: {item.status === 'iniciado' ? 'Disponível' : 'Aguardando'}
               </Text>
